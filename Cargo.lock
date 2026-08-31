@@ -1496,7 +1496,7 @@ dependencies = [
  "similar",
  "syntect",
  "tempfile",
- "thiserror 1.0.69",
+ "thiserror 2.0.20",
  "throbber-widgets-tui",
  "tokio",
  "tokio-tungstenite",

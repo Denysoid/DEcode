@@ -66,7 +66,7 @@ crossterm = { version = "0.29", features = ["event-stream"] }
 ratatui-interact = { version = "0.5.3", features = ["theme-serde"] }
 tui-syntax-highlight = { version = "0.2.0", default-features = false, features = ["regex-fancy"] }
 syntect = { version = "5.3", default-features = false, features = ["parsing", "default-syntaxes", "default-themes", "regex-fancy"] }
-thiserror = "1"
+thiserror = "2"
 dotenvy = "0.15"
 toml = "0.8"
 directories = "5"
