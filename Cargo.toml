@@ -111,7 +111,7 @@ portable-pty = "0.9"
 vt100 = "0.16"
 url = "2"
 semver = { version = "1", features = ["serde"] }
-zip = { version = "4", default-features = false, features = ["deflate"] }
+zip = { version = "8", default-features = false, features = ["deflate"] }
 throbber-widgets-tui = { version = "0.11.1", default-features = false, features = ["std"] }
 aws-config = "1.11.0"
 aws-sdk-bedrockruntime = "1.142.0"
