@@ -97,7 +97,7 @@ jobs:
           done
           test "$(find artifacts/ui-gallery -type f | wc -l)" -eq 288
       - name: Upload gallery artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: decode-ui-gallery
           path: artifacts/ui-gallery
