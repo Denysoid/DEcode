@@ -899,11 +899,12 @@ fn parse_change_list(bytes: &[u8]) -> Result<Vec<(WorktreeChangeKind, String)>, 
         .split(|byte| *byte == 0)
         .filter(|field| !field.is_empty())
         .collect::<Vec<_>>();
-    if fields.len() % 2 != 0 {
+    let (pairs, remainder) = fields.as_chunks::<2>();
+    if !remainder.is_empty() {
         return Err(WorktreeError::MalformedChangeList);
     }
-    fields
-        .chunks_exact(2)
+    pairs
+        .iter()
         .map(|pair| {
             let kind = match pair[0] {
                 b"A" => WorktreeChangeKind::Added,

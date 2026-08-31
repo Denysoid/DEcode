@@ -15,14 +15,12 @@ use std::{
 #[cfg(windows)]
 use cap_fs_ext::MetadataExt as _;
 #[cfg(unix)]
-use cap_std::fs::MetadataExt as _;
+use cap_std::fs::{MetadataExt as _, PermissionsExt as _};
 use cap_std::{
     ambient_authority,
     fs::{Dir, File, Metadata, OpenOptions, Permissions},
 };
 use sha2::{Digest, Sha256};
-#[cfg(unix)]
-use std::os::unix::fs::PermissionsExt as _;
 use thiserror::Error;
 use tokio_util::sync::CancellationToken;
 

@@ -386,9 +386,7 @@ impl PricingCatalog {
             let Some(output) = entry.output_cost_per_token else {
                 continue;
             };
-            let cached = entry
-                .cache_read_input_token_cost
-                .map_or(input, |value| value);
+            let cached = entry.cache_read_input_token_cost.unwrap_or(input);
             let rate = DeploymentPricing::from_usd_per_million(
                 model_key.clone(),
                 input * 1_000_000.0,

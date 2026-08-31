@@ -1174,7 +1174,7 @@ fn split_data_url(value: &str) -> Result<(&str, &str), ApiError> {
 #[cfg(test)]
 mod tests {
     use bytes::Bytes;
-    use futures_util::{StreamExt as _, stream};
+    use futures_util::stream;
 
     use super::*;
     use crate::api::types::{FunctionToolDefinition, InputMessage};

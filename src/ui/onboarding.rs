@@ -1032,7 +1032,7 @@ fn draw_network(frame: &mut Frame<'_>, area: Rect, wizard: &mut Wizard) {
         (Field::RetryMaxDelay, "api.retry_max_delay_secs"),
         (Field::RetryAfterCap, "api.retry_after_cap_secs"),
     ];
-    for (row, pair) in fields.chunks_exact(2).enumerate() {
+    for (row, pair) in fields.as_chunks::<2>().0.iter().enumerate() {
         let columns = Layout::horizontal([Constraint::Ratio(1, 2), Constraint::Ratio(1, 2)])
             .split(rows[row + 2]);
         for (column, (field, label)) in pair.iter().enumerate() {
@@ -1289,11 +1289,11 @@ fn valid_positive_u64(value: &str, maximum: u64) -> bool {
 }
 
 fn parse_u64(value: &str, default: u64) -> u64 {
-    value.parse().map_or(default, |parsed| parsed)
+    value.parse().unwrap_or(default)
 }
 
 fn parse_u32(value: &str, default: u32) -> u32 {
-    value.parse().map_or(default, |parsed| parsed)
+    value.parse().unwrap_or(default)
 }
 
 fn optional_value(value: &str) -> Option<String> {
