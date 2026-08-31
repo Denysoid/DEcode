@@ -1459,7 +1459,7 @@ dependencies = [
  "aws-sdk-bedrockruntime",
  "aws-smithy-types",
  "backon",
- "base64 0.22.1",
+ "base64 0.23.1",
  "bytes",
  "cap-fs-ext",
  "cap-std",

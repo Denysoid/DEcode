@@ -82,7 +82,7 @@ futures-util = "0.3"
 ignore = "0.4"
 chrono = { version = "0.4", features = ["serde"] }
 bytes = "1"
-base64 = "0.22"
+base64 = "0.23"
 cap-std = "3"
 cap-fs-ext = "3"
 regex = "1"
