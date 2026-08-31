@@ -1,0 +1,104 @@
+name: terminal-matrix
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  rust-gates:
+    name: cargo gates / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Formatting
+        run: cargo fmt --all -- --check
+      - name: Compile every target
+        run: cargo check --locked --all-targets
+      - name: Clippy is warning-free
+        run: cargo clippy --locked --all-targets -- -D warnings
+      - name: Test every target
+        run: cargo test --locked --all-targets
+
+  unix-pty:
+    name: Unix PTY / ${{ matrix.os }} / ${{ matrix.term }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        term: [xterm-256color, screen-256color]
+    env:
+      TERM: ${{ matrix.term }}
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Exercise interactive PTY lifecycle
+        run: >-
+          cargo test --locked --lib
+          terminal::tests::runtime_captures_output_and_reaps_a_short_lived_pty
+          -- --exact --nocapture
+
+  windows-conpty:
+    name: Windows ConPTY / interactive
+    runs-on: windows-latest
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Exercise ignored ConPTY lifecycle explicitly
+        timeout-minutes: 5
+        run: >-
+          cargo test --locked --lib
+          terminal::tests::runtime_captures_output_and_reaps_a_short_lived_pty
+          -- --ignored --exact --nocapture
+
+  ui-gallery:
+    name: UI gallery / all sizes, themes and locales
+    runs-on: ubuntu-latest
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Render deterministic gallery matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/ui-gallery
+          cargo build --locked --example ui_gallery
+          for locale in en ru uk es de fr pl pt zh ja ko tr; do
+            for theme in dark light; do
+              for scene in chat mcp-add lsp-add; do
+                for size in 54x24 80x30 120x40 160x50; do
+                  width="${size%x*}"
+                  height="${size#*x}"
+                  target/debug/examples/ui_gallery \
+                    "$width" "$height" "$scene" "$locale" "$theme" \
+                    > "artifacts/ui-gallery/${scene}-${locale}-${theme}-${size}.txt"
+                done
+              done
+            done
+          done
+          test "$(find artifacts/ui-gallery -type f | wc -l)" -eq 288
+      - name: Upload gallery artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: decode-ui-gallery
+          path: artifacts/ui-gallery
+          if-no-files-found: error

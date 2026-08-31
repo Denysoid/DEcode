@@ -1,0 +1,143 @@
+[package]
+name = "decode"
+version = "0.1.0"
+edition = "2024"
+authors = ["denysoid"]
+description = "A local-first, safety-focused AI coding agent for the terminal"
+readme = "README.md"
+license = "MIT"
+repository = "https://github.com/denysoid/DEcode"
+homepage = "https://github.com/denysoid/DEcode"
+keywords = ["ai", "coding-agent", "terminal", "tui", "developer-tools"]
+categories = ["command-line-utilities", "development-tools"]
+publish = false
+include = [
+    "/src/**",
+    "/tests/**",
+    "/examples/**",
+    "/Cargo.toml",
+    "/Cargo.lock",
+    "/README.md",
+    "/README.ru.md",
+    "/LICENSE",
+    "/CHANGELOG.md",
+    "/CHANGELOG.ru.md",
+    "/CONTRIBUTING.md",
+    "/CONTRIBUTING.ru.md",
+    "/CODE_OF_CONDUCT.md",
+    "/CODE_OF_CONDUCT.ru.md",
+    "/SECURITY.md",
+    "/SECURITY.ru.md",
+    "/SUPPORT.md",
+    "/SUPPORT.ru.md",
+    "/docs/**",
+    "/assets/demo.gif",
+    "/scripts/render-readme-demo.ps1",
+    "/.env.example",
+    "/config.example.toml",
+]
+
+[[bin]]
+name = "decode"
+path = "src/main.rs"
+
+[lib]
+name = "decode"
+path = "src/lib.rs"
+
+[dependencies]
+tokio = { version = "1", features = [
+    "rt-multi-thread",
+    "macros",
+    "process",
+    "signal",
+    "time",
+    "fs",
+    "io-util",
+    "sync",
+] }
+
+tokio-util = { version = "0.7", features = ["rt"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream", "json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ratatui = "0.30"
+crossterm = { version = "0.29", features = ["event-stream"] }
+ratatui-interact = { version = "0.5.3", features = ["theme-serde"] }
+tui-syntax-highlight = { version = "0.2.0", default-features = false, features = ["regex-fancy"] }
+syntect = { version = "5.3", default-features = false, features = ["parsing", "default-syntaxes", "default-themes", "regex-fancy"] }
+thiserror = "1"
+dotenvy = "0.15"
+toml = "0.8"
+directories = "5"
+clap = { version = "4", features = ["derive", "env"] }
+secrecy = { version = "0.10", features = ["serde"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
+tracing-appender = "0.2"
+async-stream = "0.3"
+async-trait = "0.1"
+backon = { version = "1.6", default-features = false, features = ["std", "tokio-sleep"] }
+futures-util = "0.3"
+ignore = "0.4"
+chrono = { version = "0.4", features = ["serde"] }
+bytes = "1"
+base64 = "0.22"
+cap-std = "3"
+cap-fs-ext = "3"
+regex = "1"
+fastrand = "2"
+httpdate = "1"
+sha2 = "0.10"
+similar = "2"
+unicode-segmentation = "1"
+unicode-width = "0.2"
+tempfile = "3"
+dunce = "1"
+fs2 = "0.4"
+http = "1"
+keyring = "4.1.6"
+open = "5"
+reqwest13 = { package = "reqwest", version = "0.13", default-features = false }
+rmcp = { version = "3.1.2", default-features = false, features = [
+    "client",
+    "auth",
+    "reqwest",
+    "transport-child-process",
+    "transport-streamable-http-client-reqwest",
+    "which-command",
+] }
+portable-pty = "0.9"
+vt100 = "0.16"
+url = "2"
+semver = { version = "1", features = ["serde"] }
+zip = { version = "4", default-features = false, features = ["deflate"] }
+throbber-widgets-tui = { version = "0.11.1", default-features = false, features = ["std"] }
+aws-config = "1.11.0"
+aws-sdk-bedrockruntime = "1.142.0"
+aws-smithy-types = "1.6.2"
+aws-credential-types = "1.3.0"
+tokio-tungstenite = { version = "0.30.0", default-features = false, features = ["connect", "rustls-tls-webpki-roots"] }
+
+[dev-dependencies]
+anyhow = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "test-util"] }
+wiremock = "0.6"
+assert_cmd = "2"
+predicates = "3"
+pretty_assertions = "1"
+
+# The all-targets test binary is large (TUI + two HTTP stacks + MCP). Full
+# CodeView debug symbols can make rustc pagefile-thrash on ordinary Windows
+# machines; assertions, overflow checks, and test behavior are unchanged.
+[profile.test]
+debug = 0
+
+[target.'cfg(unix)'.dependencies]
+nix = { version = "0.29", default-features = false, features = [
+    "process",
+    "signal",
+] }
+
+[target.'cfg(windows)'.dependencies]
+command-group = { version = "5", features = ["with-tokio"] }

@@ -1,0 +1,307 @@
+# Complete guide: docs/CONFIGURATION.md (English) and
+# docs/CONFIGURATION.ru.md (Russian).
+# Use this only as an explicitly selected trusted config (`--config`) or copy
+# the safe UI/context subset into an implicit project `.decode.toml`.
+[api]
+# Azure is the secure default and primary provider. Other explicit adapters:
+# openai, google, anthropic, bedrock_mantle, bedrock_runtime, openrouter, xai, groq, mistral,
+# deepseek, together, fireworks, cerebras, perplexity, nvidia-nim,
+# sambanova, moonshot, dashscope, huggingface, github-models, ollama,
+# and any OpenAI-compatible endpoint.
+provider = "azure"
+# `auto` selects WebSocket only for the official OpenAI Responses provider.
+# Azure, Bedrock and compatible endpoints remain on bounded SSE. Set `sse`
+# to force HTTP streaming or `websocket` for an explicit OpenAI connection.
+transport = "auto"
+# Azure always uses api-key; OpenAI always uses Bearer. For compatible
+# endpoints only, set provider_auth to "api_key" or "bearer".
+# provider_auth = "api_key"
+# `bedrock_mantle` is the OpenAI-compatible Responses route authenticated by
+# AWS_BEARER_TOKEN_BEDROCK and requires an explicit `responses_url`.
+# `bedrock_runtime` uses the official AWS SDK default credential chain and
+# SDK-managed SigV4. The optional native fields below select a profile,
+# region, role, or trusted test/private endpoint without storing credentials.
+# aws_region = "us-east-1"
+# aws_profile = "default"
+# aws_role_arn = "arn:aws:iam::123456789012:role/decode-bedrock"
+# bedrock_endpoint_url = "https://bedrock-runtime.us-east-1.amazonaws.com"
+responses_url = "https://your-resource.openai.azure.com/openai/v1/responses"
+# Alternatively use `azure_base_url`; setting both is rejected.
+# azure_base_url = "https://your-resource.openai.azure.com/openai/v1"
+deployment = "gpt-5.6-sol"
+# `model` is a provider-neutral alias for `deployment`; do not set both.
+# model = "your-model"
+deployment_choices = ["gpt-5.6-sol"]
+# api_version = "2025-04-01-preview"
+max_output_tokens = 4096
+reasoning_effort = "xhigh"
+# temperature = 0.8
+# server_compaction_threshold = 100000
+request_timeout_secs = 120
+# Deep/xhigh reasoning can produce no SSE bytes for more than 30 seconds.
+# Retries remain finite, so this does not reintroduce an endless reconnect loop.
+stream_idle_timeout_secs = 180
+max_attempts = 5
+retry_min_delay_ms = 500
+retry_max_delay_secs = 30
+retry_after_cap_secs = 120
+
+# Refresh provider-scoped model tariffs from LiteLLM's public JSON catalog.
+# No credentials or request contents are sent. Startup first loads the last
+# validated cache, and a failed/slow refresh keeps that cache plus built-ins.
+# Set false for a fully offline launch. A custom URL must use HTTPS.
+auto_pricing = true
+# pricing_catalog_url = "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json"
+
+# Optional exact rates for the Azure deployment names above. DEcode by denysoid never
+# guesses model pricing: missing deployments remain visibly "unpriced". Rates
+# are USD per one million tokens; cached input defaults to the ordinary input
+# rate when omitted.
+[[api.pricing]]
+deployment = "gpt-5.6-sol"
+# Example user override. Replace these values with the exact rate for your
+# Azure resource/SKU; this entry always wins over built-ins and remote cache.
+input_usd_per_million = 4.00
+cached_input_usd_per_million = 0.40
+output_usd_per_million = 20.00
+# Requests whose individual input exceeds this threshold use the long-context
+# tariff. The ledger keeps per-response records, so many short requests are not
+# accidentally charged as one long request.
+long_context_threshold_tokens = 272000
+long_context_input_usd_per_million = 8.00
+long_context_cached_input_usd_per_million = 0.80
+long_context_output_usd_per_million = 30.00
+
+[agent]
+# Privacy Shield is always active for model-facing filesystem access.
+# Add user-wide gitignore-style deny rules in the platform config directory's
+# `privacy.ignore`; see `examples/configuration/privacy.ignore`. Add repository
+# rules in `<workspace>/.decodeignore`.
+# Sources are additive and cannot weaken built-in .env/key/credential rules.
+context_mode = "stateless"
+context_budget = 120000
+# Set this to the documented context window of your deployment (never guessed).
+# The clickable runtime picker clamps every choice to this trusted ceiling.
+max_context_budget = 2000000
+max_tool_iterations = 20
+workspace_root = "D:/projects/my-project"
+# Optional override; defaults to the platform data directory.
+session_dir = "D:/decode-data/sessions"
+# Required immutable startup input. Use an absolute path supplied by the user;
+# it is never discovered from the workspace and symlinks are rejected.
+instructions_file = "D:/decode-config/instructions.md"
+exec_timeout_secs = 120
+
+# Repository guidance is discovered as AGENTS.md from the workspace root and
+# nested directories. Nested files apply only to their directory scope. A line
+# `@include relative/path.md` safely expands another UTF-8 file inside the same
+# workspace; symlinks, escapes, cycles, oversized files, and torn reads are
+# rejected and shown as warnings in the interactive Instructions panel.
+[agent.project_instructions]
+enabled = true
+max_source_bytes = 65536
+max_total_bytes = 262144
+max_sources = 64
+max_include_depth = 4
+
+[agent.skills]
+enabled = true
+project_enabled = true
+# User skills: platform config directory `decode/skills/**/SKILL.md`.
+# Project skills: `<workspace>/.decode/skills/**/SKILL.md`.
+# Only bounded name/description metadata is preloaded. Full SKILL.md and
+# resources require explicit read-only native calls; bundled scripts never run
+# automatically and remain subject to the normal shell approval policy.
+metadata_budget_bytes = 16384
+max_skills = 128
+max_skill_bytes = 131072
+max_resource_bytes = 262144
+max_resources = 256
+
+[agent.subagents]
+enabled = true
+# Off by default. The MCP panel exposes the same runtime switch; every child
+# call still obeys the selected server's deny/approval policy.
+allow_mcp = false
+# Capability profiles are discovered from `.decode/agents/*.toml` and the
+# platform user config `decode/agents/*.toml`; see
+# `examples/configuration/agent-profile.toml`.
+
+# Custom slash commands are discovered from `.decode/commands/*.toml` and
+# the platform user config `decode/commands/*.toml`; see
+# `examples/configuration/command.toml`. Trusted executable lifecycle hooks are
+# loaded only from the user config `decode/hooks/*.toml`; project hooks never
+# execute. See `examples/configuration/hook.toml`. Both catalogs hot-reload when
+# a prompt is submitted and can be inspected/reloaded from Agent > Commands &
+# lifecycle hooks.
+# Must be absolute and outside workspace_root. Each writer receives a true
+# detached Git worktree backed by a private snapshot repository; the user's
+# branch, index, commits, untracked files, and manual edits are not changed.
+worktree_dir = "D:/decode-data/subagent-worktrees"
+max_parallel = 4
+max_per_session = 16
+max_tool_iterations = 12
+# Token circuit breakers include billed input + output usage. A request first
+# reserves its estimated input and maximum output so parallel workers cannot
+# collectively race past the tree budget.
+max_tokens_per_agent = 150000
+max_total_tokens_per_session = 500000
+# Root is depth 0. Depth 3 permits child and grandchild delegation while
+# bounding fan-out, cost, and recovery complexity.
+max_depth = 3
+max_children_per_agent = 4
+task_timeout_secs = 1800
+git_timeout_secs = 120
+
+[agent.shell]
+# `always` is the secure default. `strict_allowlist` directly executes only
+# exact read-only argv entries without a shell; cargo/build/test still asks first.
+confirmation_mode = "always"
+
+# Trusted explicit config may select exact argv entries from the built-in
+# read-only catalog. The program is resolved only from trusted OS directories;
+# unknown utilities, PATH, shell syntax, interpreters and build tools are rejected.
+# These entries matter only in strict_allowlist mode.
+[[agent.shell.direct_exec_allowlist]]
+program = "whoami"
+args = []
+
+[[agent.shell.timeout_rules]]
+prefix = "cargo test"
+timeout_secs = 600
+
+[[agent.shell.timeout_rules]]
+prefix = "cargo check"
+timeout_secs = 300
+
+# User-controlled interactive PTY tabs. These are deliberately separate from
+# model-triggered execute_command approvals: only keyboard/mouse input from the
+# local user is written to these shells.
+[agent.shell.terminal]
+enabled = true
+# program = "powershell.exe" # None selects PowerShell on Windows or $SHELL on Unix.
+# args = ["-NoLogo"]         # Defaults are supplied only for the platform shell.
+max_sessions = 6
+scrollback_lines = 10000
+
+[agent.whip]
+enabled = true
+hotkey = "w"
+double_hit_window_ms = 2000
+penalty_completed_responses = 3
+max_output_percent = 60
+minimum_output_tokens = 256
+
+[ui]
+mouse_enabled = true
+language = "en"
+# Set to true only after completing the interactive first-launch wizard.
+onboarding_completed = false
+mascot_enabled = true
+show_thinking = true
+show_tool_activity = true
+# Deprecated compatibility alias. Prefer agent.shell.confirmation_mode.
+confirm_destructive = true
+
+[logging]
+level = "info"
+dir = "D:/projects/decode-logs"
+
+# Built-in pull-request manager uses the authenticated GitHub CLI directly,
+# never a shell. Create and checkout actions require a second explicit click.
+[github]
+enabled = true
+program = "gh"
+timeout_secs = 30
+max_pull_requests = 50
+
+# MCP is accepted only from the trusted user/explicit config. Project-local
+# .decode.toml cannot add servers, commands, URLs, headers, or credentials.
+[mcp]
+enabled = true
+startup_timeout_secs = 15
+tool_timeout_secs = 60
+max_result_bytes = 262144
+max_sse_event_bytes = 1048576
+# Finite by design: never reconnect forever after a broken HTTP/SSE session.
+reconnect_max_attempts = 2
+reconnect_base_delay_ms = 1000
+
+[[mcp.servers]]
+name = "filesystem"
+transport = "stdio"
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "D:/projects/workspace"]
+# Secrets are never written here. TARGET receives the value of SOURCE from
+# the parent process environment.
+env_from = { GITHUB_TOKEN = "GITHUB_TOKEN" }
+approval = "writes"
+trusted_read_only_tools = ["read_file", "list_directory"]
+disabled_tools = []
+
+[[mcp.servers]]
+name = "remote"
+enabled = false
+transport = "streamable_http"
+url = "https://mcp.example.com/mcp"
+bearer_token_env = "REMOTE_MCP_TOKEN"
+# Or replace bearer_token_env with OAuth discovery + PKCE:
+# oauth = { scopes = ["mcp:tools"], callback_port = 0 }
+approval = "always"
+
+# Language servers are also accepted only from trusted user/explicit config.
+# DEcode by denysoid never downloads or installs a binary. Detection only decides
+# whether an explicitly configured server is relevant to this workspace.
+[lsp]
+enabled = true
+startup_timeout_secs = 12
+request_timeout_secs = 8
+max_message_bytes = 4194304
+max_result_bytes = 131072
+max_diagnostics = 2000
+
+[[lsp.servers]]
+name = "rust-analyzer"
+enabled = true
+required = false
+auto_start = true
+command = "rust-analyzer"
+args = []
+language_id = "rust"
+extensions = [".rs"]
+root_markers = ["Cargo.toml", "rust-project.json"]
+
+# Add other installed servers with the same mechanism; no integration is
+# hard-coded. Example: command="pyright-langserver", args=["--stdio"],
+# language_id="python", extensions=[".py"], root_markers=["pyproject.toml"].
+
+# Privacy-first repository intelligence. The lexical/symbol cache is stored
+# alongside DEcode session data, never inside the working tree. Refreshes are
+# incremental and honor .gitignore plus Privacy Shield rules.
+[code_index]
+enabled = true
+auto_refresh = true
+max_files = 10000
+max_file_bytes = 524288
+max_source_bytes = 67108864
+max_chunks = 50000
+chunk_lines = 100
+overlap_lines = 12
+max_result_bytes = 131072
+
+# Optional true vector search. OFF by default: enabling this explicitly sends
+# privacy-filtered, size-bounded code chunks to the same provider/auth selected
+# under [api]. Give Azure a dedicated embeddings deployment name here. For an
+# OpenAI-compatible service whose /embeddings URL cannot be derived from the
+# Responses URL, set endpoint explicitly.
+[code_index.embeddings]
+enabled = false
+# endpoint = "https://RESOURCE.openai.azure.com/openai/v1/embeddings"
+model = "text-embedding-3-small"
+# dimensions = 1536
+batch_size = 32
+max_chunks = 10000
+max_input_bytes = 32768
+request_timeout_secs = 60
+max_attempts = 3
+hybrid_weight = 0.65

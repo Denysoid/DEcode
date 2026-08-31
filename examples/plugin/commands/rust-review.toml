@@ -1,0 +1,3 @@
+name = "Rust review"
+description = "Start a focused Rust correctness review"
+prompt = "Review the selected Rust change for correctness, cancellation safety, typed errors, and missing tests."

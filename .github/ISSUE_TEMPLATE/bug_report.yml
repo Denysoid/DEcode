@@ -1,0 +1,104 @@
+name: Bug report
+description: Report a reproducible DEcode failure or regression
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Remove credentials, private prompts, repository content, and sensitive paths before submitting.
+        Security vulnerabilities belong in private vulnerability reporting, not a public issue.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: "0.1.0 or git rev-parse --short HEAD"
+    validations:
+      required: true
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - Linux
+        - macOS
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Startup or configuration
+        - Provider or streaming
+        - Attachments or clipboard
+        - Context or usage accounting
+        - Sessions, pause, or recovery
+        - Tools, approvals, or checkpoints
+        - UI, mouse, or keyboard
+        - MCP, LSP, index, or plugins
+        - Sub-agents
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: terminal
+    attributes:
+      label: Terminal
+      description: Include terminal name, version, dimensions, and TERM on Unix when relevant.
+    validations:
+      required: true
+  - type: input
+    id: provider
+    attributes:
+      label: Provider and model/deployment
+      description: Do not include endpoints containing account identifiers or credentials.
+    validations:
+      required: false
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Start DEcode with ...
+        2. Open ...
+        3. Press ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized logs or screenshots
+      description: Remove secrets, prompts, private code, usernames, and sensitive paths.
+      render: text
+    validations:
+      required: false
+  - type: textarea
+    id: attempted
+    attributes:
+      label: Diagnostics already tried
+      description: Mention whether the latest main revision and disabled optional integrations change the result.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Safety checks
+      options:
+        - label: I removed credentials and private data from this report.
+          required: true
+        - label: I searched existing issues for the same problem.
+          required: true

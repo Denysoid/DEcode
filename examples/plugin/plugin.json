@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "id": "dev.denysoid.rust-review",
+  "name": "Rust Review Pack",
+  "version": "1.0.0",
+  "description": "Example distributable plugin with a skill and slash command.",
+  "publisher": "denysoid",
+  "license": "MIT",
+  "components": {
+    "skills": ["skills/rust-review"],
+    "commands": ["commands/rust-review.toml"]
+  }
+}

@@ -1,0 +1,4 @@
+[net]
+# Delegate Git dependencies to the installed Git client so it uses the same
+# credential helper, proxy and trusted-certificate configuration as the user.
+git-fetch-with-cli = true

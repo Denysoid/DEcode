@@ -1,0 +1,40 @@
+name: Feature request
+description: Propose a focused improvement to DEcode
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Explain the workflow problem rather than only the desired implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the user-visible result and important edge cases.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+  - type: textarea
+    id: safety
+    attributes:
+      label: Security and compatibility impact
+      description: Note changes to permissions, provider behavior, persistence, terminal support, or configuration.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Scope check
+      options:
+        - label: I searched existing issues and the feature matrix for this behavior.
+          required: true
+        - label: This proposal describes a user problem and an observable result.
+          required: true

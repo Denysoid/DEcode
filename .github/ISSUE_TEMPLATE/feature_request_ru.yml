@@ -1,0 +1,40 @@
+name: Предложить функцию (RU)
+description: Предложить конкретное улучшение DEcode
+title: "[Feature][RU]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Проблема
+      description: Опишите пользовательскую проблему, а не только желаемую реализацию.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Предлагаемое поведение
+      description: Опишите видимый результат и важные пограничные случаи.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Рассмотренные альтернативы
+    validations:
+      required: false
+  - type: textarea
+    id: safety
+    attributes:
+      label: Влияние на безопасность и совместимость
+      description: Укажите изменения permissions, provider behavior, persistence, terminal support или configuration.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Проверка scope
+      options:
+        - label: Я проверил существующие issue и feature matrix.
+          required: true
+        - label: Предложение описывает пользовательскую проблему и наблюдаемый результат.
+          required: true
