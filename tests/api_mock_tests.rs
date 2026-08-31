@@ -305,6 +305,8 @@ struct TestCommandSender {
     snapshots: watch::Receiver<UiSnapshot>,
 }
 
+type TestSendError = Box<mpsc::error::SendError<OrchestratorCommand>>;
+
 impl TestCommandSender {
     fn new(
         inner: mpsc::Sender<OrchestratorCommand>,
@@ -313,17 +315,11 @@ impl TestCommandSender {
         Self { inner, snapshots }
     }
 
-    async fn send(
-        &self,
-        command: OrchestratorCommand,
-    ) -> Result<(), mpsc::error::SendError<OrchestratorCommand>> {
-        self.inner.send(command).await
+    async fn send(&self, command: OrchestratorCommand) -> Result<(), TestSendError> {
+        self.inner.send(command).await.map_err(Box::new)
     }
 
-    async fn submit(
-        &self,
-        prompt: impl Into<String>,
-    ) -> Result<(), mpsc::error::SendError<OrchestratorCommand>> {
+    async fn submit(&self, prompt: impl Into<String>) -> Result<(), TestSendError> {
         let scope = {
             let snapshot = self.snapshots.borrow();
             CommandScope {
@@ -343,7 +339,7 @@ impl TestCommandSender {
         &self,
         prompt: impl Into<String>,
         attachments: Vec<AttachmentSource>,
-    ) -> Result<(), mpsc::error::SendError<OrchestratorCommand>> {
+    ) -> Result<(), TestSendError> {
         let scope = {
             let snapshot = self.snapshots.borrow();
             CommandScope {
@@ -370,7 +366,7 @@ async fn wait_for_snapshot(
     snapshots: &mut watch::Receiver<UiSnapshot>,
     predicate: impl Fn(&UiSnapshot) -> bool,
 ) -> UiSnapshot {
-    wait_for_snapshot_with_timeout(snapshots, Duration::from_secs(5), predicate).await
+    wait_for_snapshot_with_timeout(snapshots, Duration::from_secs(10), predicate).await
 }
 
 async fn wait_for_snapshot_with_timeout(

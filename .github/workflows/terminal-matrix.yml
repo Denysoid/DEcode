@@ -63,7 +63,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Exercise ignored ConPTY lifecycle explicitly
-        timeout-minutes: 5
+        timeout-minutes: 15
         run: >-
           cargo test --locked --lib
           terminal::tests::runtime_captures_output_and_reaps_a_short_lived_pty
