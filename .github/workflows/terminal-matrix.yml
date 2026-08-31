@@ -2,6 +2,8 @@ name: terminal-matrix
 
 on:
   push:
+    branches:
+      - main
   pull_request:
 
 permissions:
