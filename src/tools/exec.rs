@@ -1391,12 +1391,14 @@ fn strict_read_only_invocation(
     }
 
     #[cfg(unix)]
-    let allowed = match (program.as_str(), args.as_slice()) {
-        ("whoami", []) => true,
-        ("id", []) | ("id", ["-u" | "-g"]) => true,
-        ("uname", []) | ("uname", ["-a" | "-s" | "-r" | "-m"]) => true,
-        _ => false,
-    };
+    let allowed = matches!(
+        (program.as_str(), args.as_slice()),
+        ("whoami", [])
+            | ("id", [])
+            | ("id", ["-u" | "-g"])
+            | ("uname", [])
+            | ("uname", ["-a" | "-s" | "-r" | "-m"])
+    );
 
     #[cfg(windows)]
     let allowed = matches!(
@@ -2356,7 +2358,7 @@ impl ManagedChild {
     async fn spawn(command: &mut Command) -> io::Result<Self> {
         command.as_std_mut().process_group(0);
 
-        let mut child = command.spawn()?;
+        let child = command.spawn()?;
 
         let process_id = match child.id() {
             Some(value) => value,
@@ -2452,8 +2454,10 @@ impl ManagedChild {
 
 #[cfg(unix)]
 async fn dispose_unidentified_child(mut child: tokio::process::Child) {
-    if let Err(source) = child.start_kill() {
-        if source.kind() != io::ErrorKind::InvalidInput {
+    match child.start_kill() {
+        Ok(()) => {}
+        Err(source) if source.kind() == io::ErrorKind::InvalidInput => {}
+        Err(source) => {
             tracing::error!(
                 error = %source,
                 "Could not terminate child without process id"

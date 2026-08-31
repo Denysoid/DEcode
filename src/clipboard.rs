@@ -5,6 +5,7 @@ use std::{
     time::{Duration, Instant},
 };
 
+#[cfg(any(windows, test))]
 use base64::{Engine as _, engine::general_purpose::STANDARD};
 use thiserror::Error;
 
@@ -13,6 +14,7 @@ use crate::attachments::MAX_ATTACHMENT_BYTES;
 const PNG_SIGNATURE: &[u8; 8] = b"\x89PNG\r\n\x1a\n";
 const CLIPBOARD_HELPER_TIMEOUT: Duration = Duration::from_secs(8);
 const STDERR_LIMIT: usize = 16 * 1024;
+#[cfg(any(windows, test))]
 const BASE64_OVERHEAD: usize = 8;
 
 #[cfg(target_os = "linux")]
@@ -157,6 +159,7 @@ fn run_clipboard_reader(
     Ok(Some(output.stdout))
 }
 
+#[cfg(any(windows, test))]
 fn max_base64_output() -> usize {
     MAX_ATTACHMENT_BYTES
         .checked_mul(4)
@@ -246,6 +249,7 @@ fn join_reader(
         .map_err(ClipboardImageError::Start)
 }
 
+#[cfg(any(windows, test))]
 fn decode_png_base64(encoded: &[u8]) -> Result<ClipboardImage, ClipboardImageError> {
     let encoded = std::str::from_utf8(encoded)
         .map_err(|error| ClipboardImageError::InvalidBase64(error.to_string()))?
