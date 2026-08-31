@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation and support
+    url: https://github.com/denysoid/DEcode/blob/main/SUPPORT.md
+    about: Check setup, troubleshooting, and the information required for a useful report.
+  - name: Private security report
+    url: https://github.com/denysoid/DEcode/security/advisories/new
+    about: Report a vulnerability privately. Do not publish exploit details or secrets in an issue.

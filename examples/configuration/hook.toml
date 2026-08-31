@@ -1,0 +1,26 @@
+# Executable lifecycle hooks are loaded ONLY from the trusted platform user
+# config directory: <config>/decode/hooks/*.toml. Project hook files are
+# deliberately ignored and shown as diagnostics in the UI.
+
+version = 1
+id = "protect-generated-files"
+name = "Protect generated files"
+description = "Reject writes that violate a local repository policy."
+event = "pre_tool_use"
+
+# Must be an existing absolute, regular, non-symlink executable. It is started
+# directly with this argv (no harness shell), a scrubbed environment, the
+# workspace as cwd, bounded output, a timeout, and process-tree cleanup.
+program = "/absolute/path/to/reviewed-hook"
+args = ["--policy", "generated-files"]
+timeout_ms = 5000
+max_output_bytes = 16384
+blocking = true
+enabled = true
+tool_match = ["apply_patch", "write_file", "execute_command"]
+
+# The hook receives one JSON object on stdin. Exit 0 continues. Exit 2 denies a
+# pre_tool_use/user_prompt_submit event and stdout becomes the visible reason.
+# Any other failure of a blocking deny-capable hook fails closed. Hook output
+# can deny an operation, but can never approve or bypass harness confirmation.
+# Other events: session_start, user_prompt_submit, post_tool_use, turn_complete.

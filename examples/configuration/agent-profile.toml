@@ -1,0 +1,29 @@
+# Copy this file to one of these locations and rename it to a stable ID such
+# as `security-review.toml`:
+#
+#   Project-scoped: .decode/agents/security-review.toml
+#   User-scoped:    <platform config dir>/decode/agents/security-review.toml
+#
+# The final ID shown in the UI is namespaced (`project:security-review` or
+# `user:security-review`). Project profiles are repository-controlled and may
+# only narrow capabilities: they cannot select a deployment/reasoning effort
+# or enable execute_command. User profiles are trusted local configuration and
+# may opt into those runtime overrides. Shell commands still use the ordinary
+# confirmation policy even when a user profile allows execute_command.
+
+version = 1
+id = "security-review"
+name = "Security review"
+description = "Read-only review focused on trust boundaries and unsafe data flow."
+mode = "research" # research | writer
+
+tools = ["read_file", "list_directory", "search_code"]
+max_tool_iterations = 8
+
+# Use either inline instructions or a relative non-symlink instructions_file.
+instructions = "Trace untrusted inputs to privileged operations. Cite exact files and evidence."
+# instructions_file = "security-review.md"
+
+# Trusted user profiles only:
+# deployment = "my-specialized-deployment"
+# reasoning_effort = "xhigh" # low | medium | high | xhigh | max

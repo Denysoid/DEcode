@@ -1,0 +1,121 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify release tag and source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Match tag to Cargo package version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cargo metadata --no-deps --format-version 1 | python3 -c 'import json, sys; print(json.load(sys.stdin)["packages"][0]["version"])')"
+          test "${GITHUB_REF_NAME}" = "v${version}" || {
+            echo "Tag ${GITHUB_REF_NAME} does not match Cargo.toml version ${version}." >&2
+            exit 1
+          }
+      - name: Formatting
+        run: cargo fmt --all -- --check
+      - name: Compile every target
+        run: cargo check --locked --all-targets
+      - name: Clippy is warning-free
+        run: cargo clippy --locked --all-targets -- -D warnings
+      - name: Test every target
+        run: cargo test --locked --all-targets
+
+  build:
+    name: Build native binary / ${{ matrix.os }}
+    needs: verify
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build release binary
+        run: cargo build --locked --release
+      - name: Package Windows archive
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $hostTriple = ((rustc -vV | Select-String '^host: ').Line -replace '^host: ', '')
+          $archiveName = "decode-${env:GITHUB_REF_NAME}-${hostTriple}"
+          $archiveDirectory = Join-Path "dist" $archiveName
+          New-Item -ItemType Directory -Force -Path $archiveDirectory | Out-Null
+          Copy-Item "target/release/decode.exe", "README.md", "README.ru.md", "LICENSE" -Destination $archiveDirectory
+          Compress-Archive -Path $archiveDirectory -DestinationPath "dist/${archiveName}.zip"
+          $digest = (Get-FileHash "dist/${archiveName}.zip" -Algorithm SHA256).Hash.ToLowerInvariant()
+          "${digest}  ${archiveName}.zip" | Set-Content -Encoding ascii "dist/${archiveName}.zip.sha256"
+      - name: Package Unix archive
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          host_triple="$(rustc -vV | awk '/^host: / { print $2 }')"
+          archive_name="decode-${GITHUB_REF_NAME}-${host_triple}"
+          mkdir -p "dist/${archive_name}"
+          cp target/release/decode README.md README.ru.md LICENSE "dist/${archive_name}/"
+          tar -C dist -czf "dist/${archive_name}.tar.gz" "${archive_name}"
+          (
+            cd dist
+            if command -v sha256sum >/dev/null 2>&1; then
+              sha256sum "${archive_name}.tar.gz"
+            else
+              shasum -a 256 "${archive_name}.tar.gz"
+            fi > "${archive_name}.tar.gz.sha256"
+          )
+      - name: Upload release assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            dist/*.zip
+            dist/*.tar.gz
+            dist/*.sha256
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: dist
+          merge-multiple: true
+      - name: Create or update release
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" dist/* --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" dist/* \
+              --verify-tag \
+              --generate-notes \
+              --title "DEcode ${GITHUB_REF_NAME}"
+          fi

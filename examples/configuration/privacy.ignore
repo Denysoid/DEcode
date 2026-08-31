@@ -1,0 +1,10 @@
+# Copy this file to the per-user DEcode config directory as `privacy.ignore`
+# to add machine-wide, additive sensitive-path rules.
+#
+# Add repository-specific rules to `.decodeignore` in that repository.
+# Both files use gitignore syntax. Negation can refine rules in the same file,
+# but it can never weaken DEcode's built-in secret patterns.
+
+**/customer-data/**
+**/*.production-secret
+local/private-notes.md

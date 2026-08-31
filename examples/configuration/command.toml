@@ -1,0 +1,23 @@
+# Copy this file to either:
+#   project: .decode/commands/review.toml
+#   user:    <platform config dir>/decode/commands/review.toml
+# A trusted user definition with the same id overrides the project definition.
+
+version = 1
+id = "review"
+name = "Focused security review"
+description = "Review one path for concrete correctness and security defects."
+argument_hint = "<path> <focus>"
+requires_arguments = true
+
+# $ARGUMENTS / ${ARGS} expands to the exact unparsed remainder. ${1}..${9}
+# use shell-like quoted positional arguments. Missing referenced positions are
+# reported to the user; the command is never submitted partially.
+prompt = """
+Review ${1} carefully. Focus on ${2}.
+
+Report only evidence-backed findings, then propose the smallest safe fixes.
+"""
+
+# Instead of `prompt`, use a non-symlink UTF-8 file next to this TOML:
+# prompt_file = "review-prompt.md"

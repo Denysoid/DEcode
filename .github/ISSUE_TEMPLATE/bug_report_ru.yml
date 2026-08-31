@@ -1,0 +1,104 @@
+name: Сообщить о баге (RU)
+description: Сообщить о воспроизводимой ошибке или регрессии DEcode
+title: "[Bug][RU]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        До публикации удалите credentials, приватные prompts, код репозитория и чувствительные пути.
+        Уязвимости отправляются через private vulnerability reporting, а не public issue.
+  - type: input
+    id: version
+    attributes:
+      label: Версия или commit
+      placeholder: "0.1.0 или git rev-parse --short HEAD"
+    validations:
+      required: true
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: Операционная система
+      options:
+        - Windows
+        - Linux
+        - macOS
+        - Другая
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Область ошибки
+      options:
+        - Запуск или конфигурация
+        - Провайдер или streaming
+        - Вложения или буфер обмена
+        - Контекст или подсчёт usage
+        - Сессии, pause или recovery
+        - Tools, approvals или checkpoints
+        - UI, мышь или клавиатура
+        - MCP, LSP, индекс или плагины
+        - Субагенты
+        - Другое
+    validations:
+      required: true
+  - type: input
+    id: terminal
+    attributes:
+      label: Терминал
+      description: Укажите название, версию, размеры и TERM в Unix, если это важно.
+    validations:
+      required: true
+  - type: input
+    id: provider
+    attributes:
+      label: Провайдер и модель/deployment
+      description: Не указывайте endpoint с идентификаторами аккаунта или секретами.
+    validations:
+      required: false
+  - type: textarea
+    id: steps
+    attributes:
+      label: Шаги воспроизведения
+      placeholder: |
+        1. Запустить DEcode с ...
+        2. Открыть ...
+        3. Нажать ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемое поведение
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Фактическое поведение
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Очищенные логи или screenshots
+      description: Удалите секреты, prompts, приватный код, имена пользователей и чувствительные пути.
+      render: text
+    validations:
+      required: false
+  - type: textarea
+    id: attempted
+    attributes:
+      label: Уже выполненная диагностика
+      description: Укажите, меняется ли результат на актуальной main и при отключённых необязательных интеграциях.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Проверка безопасности
+      options:
+        - label: Я удалил credentials и приватные данные из отчёта.
+          required: true
+        - label: Я нашёл и проверил похожие issue.
+          required: true
