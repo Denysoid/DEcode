@@ -84,7 +84,7 @@ chrono = { version = "0.4", features = ["serde"] }
 bytes = "1"
 base64 = "0.22"
 cap-std = "3"
-cap-fs-ext = "3"
+cap-fs-ext = "4"
 regex = "1"
 fastrand = "2"
 httpdate = "1"
