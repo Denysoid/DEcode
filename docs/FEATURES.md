@@ -60,7 +60,7 @@ Writer isolation, durable acknowledgement, file-claim scheduling, DAG failure pr
 
 ## Tested surface
 
-CI runs formatting, compilation, Clippy with warnings denied, and all targets on Windows, Linux, and macOS. Separate jobs exercise Unix PTY, Windows ConPTY, and 288 deterministic UI renders across three screens, twelve locales, two themes, and four terminal sizes.
+CI runs formatting, compilation, Clippy with warnings denied, and all targets on Windows, Linux, and macOS. Separate jobs exercise Unix PTY behavior and render 288 deterministic UI combinations across three screens, twelve locales, two themes, and four terminal sizes. The Windows gate compiles the ConPTY backend; the live ConPTY smoke test remains local because hosted runners do not provide a reliable interactive console.
 
 This coverage reduces regressions; it is not proof for every terminal emulator, proxy, model revision, filesystem, SSH/multiplexer combination, or provider outage.
 

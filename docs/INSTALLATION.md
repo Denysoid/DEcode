@@ -8,7 +8,7 @@ DEcode is currently distributed as source code. The repository does not track co
 
 | Platform | CI coverage | Notes |
 |---|---|---|
-| Windows 10/11 | Build, Clippy, tests, and ConPTY lifecycle | PowerShell and CMD are supported launch shells |
+| Windows 10/11 | Build, Clippy, tests, and ConPTY compilation | PowerShell and CMD are supported launch shells |
 | Linux | Build, Clippy, tests, PTY, and UI gallery | Wayland clipboard images use `wl-paste`; X11 uses `xclip` |
 | macOS | Build, Clippy, tests, and PTY lifecycle | Clipboard images use the built-in `osascript` runtime |
 

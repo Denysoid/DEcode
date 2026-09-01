@@ -281,7 +281,8 @@ fn file_browser_primary_button_opens_the_selected_directory()
 }
 
 #[test]
-fn terminal_generated_path_keystrokes_become_an_attachment_chip()
+#[cfg(windows)]
+fn windows_terminal_generated_path_keystrokes_become_an_attachment_chip()
 -> Result<(), Box<dyn std::error::Error>> {
     let selected = tempfile::tempdir()?;
     let image_path = selected.path().join("screen clip.png");

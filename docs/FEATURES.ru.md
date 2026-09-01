@@ -60,7 +60,7 @@ Writer isolation, durable acknowledgement, scheduling file claims, DAG failure p
 
 ## Проверяемая поверхность
 
-CI запускает formatting, compilation, Clippy с запретом warnings и все targets в Windows, Linux и macOS. Отдельные jobs проверяют Unix PTY, Windows ConPTY и 288 детерминированных UI renders для трёх экранов, двенадцати locale, двух themes и четырёх размеров терминала.
+CI запускает форматирование, компиляцию, Clippy с запретом предупреждений и все цели в Windows, Linux и macOS. Отдельные задания проверяют Unix PTY и рендерят 288 детерминированных сочетаний трёх экранов, двенадцати языков, двух тем и четырёх размеров терминала. Windows-проверка компилирует ConPTY; живой проверочный запуск ConPTY остаётся локальным, потому что облачные исполнители GitHub не предоставляют надёжную интерактивную консоль.
 
 Такое покрытие уменьшает число regressions, но не является доказательством для каждого terminal emulator, proxy, revision модели, filesystem, сочетания SSH/multiplexer или сбоя провайдера.
 

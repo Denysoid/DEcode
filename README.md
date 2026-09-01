@@ -275,7 +275,7 @@ On Windows, regenerate the README animation from those real gallery scenes with:
 .\scripts\render-readme-demo.ps1
 ```
 
-CI runs Rust gates on Windows, Linux, and macOS, exercises Unix PTY and Windows ConPTY behavior, and renders 288 combinations of locale, theme, screen, and terminal size.
+CI runs Rust gates on Windows, Linux, and macOS, exercises Unix PTY behavior, compiles the Windows ConPTY backend, and renders 288 combinations of locale, theme, screen, and terminal size.
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change and [CHANGELOG.md](CHANGELOG.md) for release notes.
 

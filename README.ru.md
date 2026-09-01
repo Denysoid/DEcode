@@ -275,7 +275,7 @@ cargo run --locked --example ui_gallery -- 160 50 mcp-add en light
 .\scripts\render-readme-demo.ps1
 ```
 
-CI выполняет Rust gates в Windows, Linux и macOS, проверяет Unix PTY и Windows ConPTY и рендерит 288 сочетаний locale, theme, screen и размера терминала.
+CI запускает Rust-проверки в Windows, Linux и macOS, проверяет работу Unix PTY, компилирует Windows ConPTY и рендерит 288 сочетаний языка, темы, экрана и размера терминала.
 
 Перед изменениями прочитайте [CONTRIBUTING.ru.md](CONTRIBUTING.ru.md), а пользовательские изменения смотрите в [CHANGELOG.ru.md](CHANGELOG.ru.md).
 
