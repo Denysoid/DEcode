@@ -68,7 +68,7 @@ tui-syntax-highlight = { version = "0.2.0", default-features = false, features =
 syntect = { version = "5.3", default-features = false, features = ["parsing", "default-syntaxes", "default-themes", "regex-fancy"] }
 thiserror = "1"
 dotenvy = "0.15"
-toml = "0.8"
+toml = "1.1"
 directories = "5"
 clap = { version = "4", features = ["derive", "env"] }
 secrecy = { version = "0.10", features = ["serde"] }
