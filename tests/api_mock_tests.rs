@@ -3173,22 +3173,21 @@ async fn pause_resume_metrics_cover_the_entire_logical_turn() {
                 completed_sse_with_items("after-pause", "resumed answer", Vec::new()),
             ]),
             delayed_indices: Arc::new(vec![0, 1]),
-            delay: Duration::from_millis(200),
+            delay: Duration::from_secs(2),
         })
         .mount(&server)
         .await;
 
     let workspace = TempDir::new().unwrap();
     std::fs::write(workspace.path().join("pause.txt"), "contents").unwrap();
+    let mut api = api_config(&server);
+    api.request_timeout = Duration::from_secs(10);
+    api.stream_idle_timeout = Duration::from_secs(10);
     let (event_tx, mut events) = mpsc::channel(64);
     let (command_tx, command_rx) = mpsc::channel(64);
-    let (orchestrator, snapshots, urgent) = Orchestrator::with_runtime(
-        api_config(&server),
-        agent_config(workspace.path(), 3),
-        event_tx,
-        command_rx,
-    )
-    .unwrap();
+    let (orchestrator, snapshots, urgent) =
+        Orchestrator::with_runtime(api, agent_config(workspace.path(), 3), event_tx, command_rx)
+            .unwrap();
     let task = tokio::spawn(orchestrator.run());
     let mut command_snapshots = snapshots.clone();
     wait_for_initial_scope(&mut command_snapshots).await;
