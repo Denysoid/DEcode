@@ -69,7 +69,7 @@ syntect = { version = "5.3", default-features = false, features = ["parsing", "d
 thiserror = "1"
 dotenvy = "0.15"
 toml = "0.8"
-directories = "5"
+directories = "6"
 clap = { version = "4", features = ["derive", "env"] }
 secrecy = { version = "0.10", features = ["serde"] }
 tracing = "0.1"
