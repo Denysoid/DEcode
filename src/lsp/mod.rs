@@ -1689,7 +1689,13 @@ fn relative_uri_path(root: &Path, uri: &str) -> Option<String> {
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => path,
         Err(_) => return None,
     };
-    let relative = scoped_path.strip_prefix(root).ok()?;
+    let relative = match scoped_path.strip_prefix(root) {
+        Ok(relative) => relative.to_path_buf(),
+        Err(_) => {
+            let canonical_root = dunce::canonicalize(root).ok()?;
+            scoped_path.strip_prefix(canonical_root).ok()?.to_path_buf()
+        }
+    };
     Some(relative.to_string_lossy().replace('\\', "/"))
 }
 
@@ -2165,6 +2171,25 @@ mod tests {
             Some("src.rs")
         );
         assert_eq!(sanitize_text("bad\u{1b}[31m\u{202e}", 128), "bad�[31m�");
+        Ok(())
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn relative_uri_path_accepts_a_workspace_root_alias() -> Result<(), Box<dyn std::error::Error>>
+    {
+        let real_root = tempdir()?;
+        let aliases = tempdir()?;
+        let root_alias = aliases.path().join("workspace-link");
+        std::os::unix::fs::symlink(real_root.path(), &root_alias)?;
+        let file = root_alias.join("src.rs");
+        fs::write(real_root.path().join("src.rs"), "fn main() {}")?;
+        let uri = url::Url::from_file_path(&file).map_err(|()| "URI conversion failed")?;
+
+        assert_eq!(
+            relative_uri_path(&root_alias, uri.as_str()).as_deref(),
+            Some("src.rs")
+        );
         Ok(())
     }
 }

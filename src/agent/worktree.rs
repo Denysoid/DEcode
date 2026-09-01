@@ -180,12 +180,11 @@ impl WorktreeManager {
         git_timeout: Duration,
     ) -> Result<Self, WorktreeError> {
         let workspace_root = canonical_directory(workspace).await?;
-        if configured_root.is_absolute()
-            && git_path(configured_root).starts_with(git_path(&workspace_root))
-        {
+        let configured_candidate = canonical_candidate_path(configured_root).await?;
+        if git_path(&configured_candidate).starts_with(git_path(&workspace_root)) {
             return Err(WorktreeError::RootInsideWorkspace {
                 workspace: workspace_root,
-                worktree_root: configured_root.to_path_buf(),
+                worktree_root: configured_candidate,
             });
         }
         tokio::fs::create_dir_all(configured_root)
@@ -876,6 +875,33 @@ async fn canonical_directory(path: &Path) -> Result<PathBuf, WorktreeError> {
     Ok(canonical)
 }
 
+async fn canonical_candidate_path(path: &Path) -> Result<PathBuf, WorktreeError> {
+    let absolute = if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        std::env::current_dir()
+            .map_err(|source| WorktreeError::Io {
+                path: PathBuf::from("."),
+                source,
+            })?
+            .join(path)
+    };
+    let existing_ancestor = absolute
+        .ancestors()
+        .find(|candidate| candidate.is_dir())
+        .ok_or_else(|| WorktreeError::Io {
+            path: absolute.clone(),
+            source: std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "no existing ancestor for managed worktree root",
+            ),
+        })?;
+    let suffix = absolute
+        .strip_prefix(existing_ancestor)
+        .map_err(|_| WorktreeError::PathEscape(absolute.clone()))?;
+    Ok(canonical_directory(existing_ancestor).await?.join(suffix))
+}
+
 async fn create_direct_child_directory(
     parent: &Path,
     name: &str,
@@ -1093,6 +1119,27 @@ mod tests {
             Err(WorktreeError::RootInsideWorkspace { .. })
         ));
         assert!(!configured.exists());
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn rejects_a_new_control_root_through_a_workspace_alias()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let workspace = git_workspace()?;
+        let aliases = tempfile::tempdir()?;
+        let workspace_alias = aliases.path().join("workspace-link");
+        link_directory(workspace.path(), &workspace_alias)?;
+        let configured = workspace_alias.join("nested").join("worktrees");
+
+        let result =
+            WorktreeManager::open(workspace.path(), &configured, Duration::from_secs(10)).await;
+
+        assert!(matches!(
+            result,
+            Err(WorktreeError::RootInsideWorkspace { .. })
+        ));
+        assert!(!workspace.path().join("nested").exists());
+        unlink_directory(&workspace_alias)?;
         Ok(())
     }
 
