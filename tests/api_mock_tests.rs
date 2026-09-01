@@ -3172,8 +3172,8 @@ async fn pause_resume_metrics_cover_the_entire_logical_turn() {
                 completed_sse_with_items("cancelled", "not committed", Vec::new()),
                 completed_sse_with_items("after-pause", "resumed answer", Vec::new()),
             ]),
-            delayed_indices: Arc::new(vec![0, 1]),
-            delay: Duration::from_secs(2),
+            delayed_indices: Arc::new(vec![1]),
+            delay: Duration::from_secs(8),
         })
         .mount(&server)
         .await;
@@ -3206,6 +3206,7 @@ async fn pause_resume_metrics_cover_the_entire_logical_turn() {
             _ => {}
         }
     }
+    tokio::time::sleep(Duration::from_millis(200)).await;
     urgent.pause(1);
     wait_for_snapshot(&mut snapshots, |snapshot| {
         snapshot.paused_turn_id == Some(1)
